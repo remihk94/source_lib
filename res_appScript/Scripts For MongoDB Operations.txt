@@ -1,0 +1,139 @@
+//////////////////////////////// INSERT //////////////////////////////////
+ #region insert 
+        // MongoDB connection string and database name
+        string connectionString = "YOUR DATABASE CONNECTION HERE";
+        string databaseName = "DATABASE NAME";
+
+        // Create a MongoDB client
+        var client = new MongoClient(connectionString);
+
+        // Get a reference to the database
+        var database = client.GetDatabase(databaseName);
+
+        // Get a reference to the collection
+        var collection = database.GetCollection<BsonDocument>("inserteddocuments");
+
+        // Generate the point geometry
+
+
+        // Number of documents to insert
+        int numDocuments = 10000;
+
+
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+
+        TimeSpan totalInstructionElapsed = TimeSpan.Zero;
+
+        for (int i = 0; i < numDocuments; i++)
+        {
+            var coordinates = new GeoJson2DGeographicCoordinates(25.7335925, -77.8279785); // RANDOM POINT
+            var point = new GeoJsonPoint<GeoJson2DGeographicCoordinates>(coordinates);
+
+            BsonDocument geoJsonDocument = point.ToBsonDocument();
+
+            Stopwatch instructionTimer = new Stopwatch();
+
+            instructionTimer.Start();
+
+            // Insert instruction to measure
+            collection.InsertOne(geoJsonDocument);
+
+            instructionTimer.Stop();
+            totalInstructionElapsed += instructionTimer.Elapsed;
+
+        }
+
+        stopwatch.Stop();
+
+        Console.WriteLine($"Total instruction elapsed time: {totalInstructionElapsed.TotalSeconds} seconds");
+
+        // Wait for user input to exit
+        Console.ReadLine();
+
+        #endregion
+
+
+///////////////////////////////////////// UPDATE ////////////////////////////////
+
+      //MongoDB connection string and database name
+        string connectionString = "YOUR CONNECTION HERE";
+        string databaseName = "DATABASE NAME";
+
+        // Create a MongoDB client
+        var client = new MongoClient(connectionString);
+
+        // Get a reference to the database
+        var database = client.GetDatabase(databaseName);
+
+        // Get a reference to the collection
+        var collection = database.GetCollection<BsonDocument>("locations");
+
+        // Generate the new point geometry
+        var newPointGeometry = new BsonDocument
+                {
+                    { "type", "Point" },
+                    { "coordinates", new BsonArray { 12.345, -67.890 } }
+                };
+
+        // Number of documents to update
+        int numDocuments = 10000;
+
+        var filter = new BsonDocument();
+        var update = Builders<BsonDocument>.Update.Set("COLLECTION NAME", newPointGeometry);
+        var updateOptions = new UpdateOptions { IsUpsert = false };
+
+
+
+        // Start the stopwatch to measure the update time
+        Stopwatch stopwatch = Stopwatch.StartNew();
+
+        // Update the documents one by one
+        for (int i = 0; i < numDocuments; i++)
+        {
+            collection.UpdateOne(filter, update, updateOptions);
+            //  Console.WriteLine($"Documents updated {i}");
+        }
+
+        // Stop the stopwatch
+        stopwatch.Stop();
+
+        Console.WriteLine($"Documents updated successfully. Total elapsed time: {stopwatch.Elapsed.TotalSeconds} seconds");
+
+        // Wait for user input to exit
+        Console.ReadLine();
+
+//////////////////////////////////////////// DELETE ////////////////////////////////
+
+
+        //MongoDB connection string and database name
+        string connectionString = "YOUR CONNECTION HERE";
+        string databaseName = "DATABASE NAME";
+
+        // Create a MongoDB client
+        var client = new MongoClient(connectionString);
+
+        // Get a reference to the database
+        var database = client.GetDatabase(databaseName);
+
+        // Get a reference to the collection
+        var collection = database.GetCollection<BsonDocument>("COLLECTION NAME");
+        var filter = new BsonDocument();
+        // Start the stopwatch to measure the delete time
+        Stopwatch stopwatch = Stopwatch.StartNew();
+
+        // Delete the top 10000 documents
+        for (int i = 0; i < 10000; i++)
+        {
+
+            collection.DeleteOne(filter);
+            //  Console.WriteLine($"Documents deleted successfully {i} ");
+        }
+
+        // Stop the stopwatch
+        stopwatch.Stop();
+
+        Console.WriteLine($"Documents deleted successfully. Total elapsed time: {stopwatch.Elapsed.TotalSeconds} seconds");
+
+        // Wait for user input to exit
+        Console.ReadLine();
